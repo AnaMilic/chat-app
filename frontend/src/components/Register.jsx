@@ -71,7 +71,7 @@ function Register() {
         </button>
         <button
           onClick={() => {
-            navigate("/login");
+            navigate("/");
           }}
         >
           Navigate to Login

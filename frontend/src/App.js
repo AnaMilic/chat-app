@@ -9,9 +9,9 @@ function App() {
   return (
     <Fragment>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/chatPage" element={<ChatPage />} />
+        <Route path="/" element={<ChatPage />} />
       </Routes>
     </Fragment>
   );

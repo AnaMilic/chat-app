@@ -14,6 +14,7 @@ function Login() {
           password,
         },
       });
+      console.log(reqBody);
       if (!reqBody) return;
       let res = await fetch("http://localhost:5050/api/users/login", {
         method: "POST",
@@ -25,9 +26,12 @@ function Login() {
       });
       const formattedResponse = await res.json();
       if (res.status === 200) {
+        console.log({ formattedResponse });
+        localStorage.setItem("user-info", JSON.stringify(formattedResponse));
         setUsername("");
         setPassword("");
-        navigate("/");
+        navigate("/chatPage");
+        alert("Login successful");
       } else {
         alert(formattedResponse, "Login failed");
       }
