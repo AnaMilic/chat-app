@@ -1,28 +1,27 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const User = require("./User");
 
 const ChatSchema = new Schema(
   {
     chatName: {
       type: String,
-
       trim: true,
     },
-    /*isGroupChat:{
-    type:Boolean,
-    default:false
-  },*/
-    users: [
+    chatUsers: [
       {
         type: mongoose.Types.ObjectId,
-        ref: "User",
+        ref: User,
       },
     ],
-    latestMessage: {
+    /*lastMessage: {
       type: mongoose.Types.ObjectId,
       ref: "Message",
+    },*/
+    lastMessage: {
+      type: String,
     },
-  },
-  { timestamps: true }
+  }
+  // { timestamps: true }
 );
 module.exports = Chat = mongoose.model("chats", ChatSchema);
