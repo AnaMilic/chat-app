@@ -2,11 +2,22 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   //res.status(200).json(["ana", "ana123"]);
-  User.find({})
+  /*User.find({})
     .then((user) => res.status(200).json(user))
-    .catch((error) => res.status(400).json(error));
+    .catch((error) => res.status(400).json(error));*/
+
+  console.log(req.query);
+  const keyword = req.query.search
+    ? {
+        username: { $regex: req.query.search, $options: "i" },
+      }
+    : {};
+
+  const users = await User.find(keyword);
+  res.send(users);
+  console.log(users);
 });
 router.post("/", (req, res) => {
   console.log(req.body);
@@ -36,10 +47,15 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ username });
     console.log(user);
 
-    if (!user || password !== user.password) {
+    /*if (!user || password !== user.password) {
+      return res.status(400).json("User with that data does not exist");
+    }*/
+    if (user && (await user.matchPassword(password))) {
+      return res.status(200).json(user);
+    } else {
       return res.status(400).json("User with that data does not exist");
     }
-    return res.status(200).json(user);
+    //return res.status(200).json(user);
   } catch (error) {
     console.log(error);
   }
