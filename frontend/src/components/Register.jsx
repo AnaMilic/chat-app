@@ -66,7 +66,11 @@ function Register() {
           required
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit" onClick={(e) => handleRegister(e)}>
+        <button
+          type="submit"
+          onClick={(e) => handleRegister(e)}
+          disabled={username === "" || password === ""}
+        >
           Register
         </button>
         <button

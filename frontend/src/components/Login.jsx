@@ -68,7 +68,11 @@ function Login() {
           required
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit" onClick={(e) => handleLogin(e)}>
+        <button
+          type="submit"
+          onClick={(e) => handleLogin(e)}
+          disabled={username === "" || password === ""}
+        >
           Login
         </button>
       </form>
