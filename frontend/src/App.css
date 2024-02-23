@@ -35,7 +35,7 @@ form {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
+  margin: auto;
 }
 form > label {
   margin-bottom: 15px;
@@ -69,9 +69,48 @@ button {
   transition: all 0.4s ease;
 
 }
-button:hover {
+button:enabled:hover {
   transform: translateY(-4px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   color: #ffcb69;
 }
-    
+
+
+.chatPage{
+  display:flex
+}
+.contactsColumn{
+  border: 2px solid #ff6b35;
+  flex:20%;
+  height: 100vh;
+  width: 1vh;
+  position: relative;
+}
+.openedChatColumn{
+  border: 2px solid #ff6b35;
+  flex:80%;
+  height: 100vh;
+  position: relative;
+}
+.chatField{
+  background-color: antiquewhite;
+  border: 1px solid #ff6b35;
+  border-radius: 5px;
+  padding: 5px;
+  
+  width:90%;
+  margin:5% 5%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messages{
+  background-color: blue;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  padding: 0px 5px;
+  
+}
