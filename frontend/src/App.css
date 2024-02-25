@@ -97,20 +97,35 @@ button:enabled:hover {
   border: 1px solid #ff6b35;
   border-radius: 5px;
   padding: 5px;
-  
   width:90%;
-  margin:5% 5%;
+  margin:5% ;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .messages{
-  background-color: blue;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
   scrollbar-width: none;
   padding: 0px 5px;
   
+}
+#search{
+  width: 90%;
+  margin: 5% ;
+  border: 1px solid #ff6b35;
+  border-radius: 20px;
+  height: 10px;
+}
+.typing{
+  background-color: beige;
+  width: fit-content;
+  padding: 2px;
+  border-radius: 15px;
+  color: grey;
+  margin: 10px;
+  font-size: 80%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }

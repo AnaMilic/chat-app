@@ -1,15 +1,9 @@
-import React from "react";
-import ScrollableFeed from "react-scrollable-feed";
+import React, { forwardRef } from "react";
 
-const ChatColumn = ({
-  chatName,
-  onClick,
-  onChange,
-  value,
-  logout,
-  messages,
-  user,
-}) => (
+const ChatColumn = (
+  { chatName, onClick, onChange, value, logout, messages, user, isTyping },
+  ref
+) => (
   <div className="openedChatColumn">
     <div
       style={{
@@ -38,35 +32,41 @@ const ChatColumn = ({
         Logout <i className="fa-solid fa-right-from-bracket"></i>
       </button>
     </div>
-    <div className="messages" style={{ height: "83vh" }}>
-      <ScrollableFeed>
-        {messages &&
-          messages.map((m, i) => (
-            <div style={{ display: "flex" }} key={m._id}>
-              <span
-                style={{
-                  backgroundColor: `${
-                    m.sender._id === user ? "white" : "#B9F5D0"
-                  }`,
-                  borderRadius: "20px",
-                  padding: "5px 15px",
-                  maxWidth: "75%",
-                  marginLeft: `${m.sender._id === user ? "auto" : "0"}`,
-                  marginTop: "2px",
-                  marginBottom: "2px",
-                }}
-              >
-                {m.messageText}
-              </span>
-            </div>
-          ))}
-      </ScrollableFeed>
+    <div className="messages" style={{ height: "80vh" }}>
+      <div ref={ref}>
+        {messages.map((m) => (
+          <div style={{ display: "flex" }} key={m._id}>
+            <span
+              style={{
+                backgroundColor: `${
+                  m.sender._id === user ? "white" : "#B9F5D0"
+                }`,
+                borderRadius: "20px",
+                padding: "5px 15px",
+                maxWidth: "75%",
+                marginLeft: `${m.sender._id === user ? "auto" : "0"}`,
+                marginTop: "2px",
+                marginBottom: "2px",
+              }}
+            >
+              {m.messageText}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
+    {isTyping ? (
+      <div className="typing" style={{ height: "3vh" }}>
+        Typing...
+      </div>
+    ) : (
+      <></>
+    )}
     <div
       style={{
         display: "flex",
         alignItems: "center",
-        margin: "5px",
+        margin: "5px ",
         position: "absolute",
         bottom: "0",
         left: "0",
@@ -104,4 +104,4 @@ const ChatColumn = ({
   </div>
 );
 
-export default ChatColumn;
+export default forwardRef(ChatColumn);

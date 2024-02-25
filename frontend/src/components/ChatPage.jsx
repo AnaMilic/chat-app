@@ -1,18 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ChatField from "./ChatField";
 import ChatColumn from "./ChatColumn";
 
+import io from "socket.io-client";
+const ENDPOINT = "http://localhost:5050";
+var socket, selectedChatCompare;
+
 function ChatPage() {
   const navigate = useNavigate();
   let [chats, setChats] = useState([]);
   let userId = JSON.parse(localStorage.getItem("user-info"))._id;
-
   let [selectedChat, setSelectedChat] = useState(null);
-
   let [messages, setMessages] = useState([]);
   let [newMessage, setNewMessage] = useState("");
+
+  const chatColumnRef = useRef(null);
+
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typingState, setTypingState] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [notification, setNotification] = useState([]);
 
   const fetchChats = () => {
     return axios
@@ -50,6 +60,7 @@ function ChatPage() {
         } else {
           setMessages(response.data);
           console.log(messages);
+          socket.emit("join chat", selectedChat._id);
         }
       })
       .catch((err) => {
@@ -57,22 +68,22 @@ function ChatPage() {
         alert("Error with finding your messages");
       });
   };
-
-  //console.log(selectedChat);
-
-  useEffect(() => {
-    fetchChats();
-  }, []);
   useEffect(() => {
     fetchMessages();
+    selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
-  if (chats.length === 0) {
-    return null;
-  }
-
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup", userId);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("end typing", () => setIsTyping(false));
+  }, []);
+  //console.log(selectedChat);
   const sendMessage = async (e) => {
     //console.log("mess sendingggg");
+    socket.emit("end typing", selectedChat._id);
     try {
       const reqBody = JSON.stringify({
         messageText: newMessage,
@@ -90,12 +101,12 @@ function ChatPage() {
         body: reqBody,
       });
       const formattedResponse = await res.json();
-      console.log(formattedResponse);
+      console.log({ formattedResponse });
 
       if (res.status === 200) {
         setNewMessage("");
-        setMessages([...messages, formattedResponse.data]);
-        alert("Message sent");
+        socket.emit("new message", formattedResponse);
+        setMessages([...messages, formattedResponse]);
       } else {
         alert("Sending of message failed " + formattedResponse);
       }
@@ -104,15 +115,63 @@ function ChatPage() {
       alert(error);
     }
   };
+
+  useEffect(() => {
+    fetchChats();
+  }, []);
+
+  useEffect(() => {
+    socket.on("message received", (newMessageReceived) => {
+      console.log(newMessageReceived);
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessageReceived.chat._id
+      ) {
+        //salje se obavestenje jer sam u ovom slucaju u jednom cetu, tj jedan mi je otvoren a poruka stize na drugi
+        if (!notification.includes(newMessageReceived)) {
+          setNotification([newMessageReceived, ...notification]);
+        }
+      } else {
+        flushSync(() => {
+          setMessages([...messages, newMessageReceived]);
+        });
+        chatColumnRef.current.lastElementChild.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }
+    });
+  });
+
+  if (chats.length === 0) {
+    return null;
+  }
+
   const typing = (ev) => {
     setNewMessage(ev.target.value);
-    //console.log("typinggggg");
-    //console.log("new mess:" + newMessage);
+    if (!socketConnected) return;
+    if (!typingState) {
+      setTypingState(true);
+      socket.emit("typing", selectedChat._id);
+    }
+
+    let lastTypingTime = new Date().getTime();
+    let timer = 5000;
+    setTimeout(() => {
+      let currentTime = new Date().getTime();
+      let timeDifference = currentTime - lastTypingTime;
+      if (timeDifference >= timer && typingState) {
+        socket.emit("end typing", selectedChat._id);
+        setTypingState(false);
+      }
+    }, timer);
   };
   const logout = () => {
     navigate("/");
     localStorage.removeItem("user-info");
   };
+
+  console.log({ messages });
 
   return (
     <div className="chatPage">
@@ -127,10 +186,13 @@ function ChatPage() {
         >
           My chats
         </div>
-        <div>search</div>
+        search
+        <br />
+        <input type="text" name="search" id="search" placeholder="search" />
         {chats.map((c) => {
           return (
             <ChatField
+              key={c._id}
               chatId={c._id}
               chatName={c.chatName}
               friend={c.chatUsers.filter((u) => u._id !== userId)[0].username}
@@ -139,11 +201,13 @@ function ChatPage() {
                 setSelectedChat(c);
               }}
               isActive={c._id === selectedChat?._id}
+              //notif={notification.includes()}
             />
           );
         })}
       </div>
       <ChatColumn
+        ref={chatColumnRef}
         chatName={
           selectedChat.chatUsers[0]._id === userId
             ? selectedChat.chatUsers[1].username
@@ -151,6 +215,7 @@ function ChatPage() {
         }
         value={newMessage}
         onClick={(e) => sendMessage(e)}
+        isTyping={isTyping}
         onChange={(ev) => typing(ev)}
         logout={logout}
         messages={messages}
