@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const Message = require("../models/Message");
 const User = require("../models/User");
+const Chat = require("../models/Chat");
 
 router.get("/:chatId", async (req, res) => {
   //res.status(200).json(["ana", "wgebignoqr", "chat1"]);
   try {
     const chatId = req.params.chatId;
-    console.log({ chatId });
+    //console.log({ chatId });
     const messages = await Message.find({
       chat: chatId,
     })
@@ -15,7 +16,7 @@ router.get("/:chatId", async (req, res) => {
       .populate("chat")
       .exec();
 
-    console.log({ messages });
+    //console.log({ messages });
     res.status(200).json(messages);
   } catch (error) {
     console.log(error);
@@ -39,6 +40,9 @@ router.post("/", async (req, res) => {
   newMessage = await User.populate(newMessage, {
     path: "chat.chatUsers",
     select: "username",
+  });
+  await Chat.findByIdAndUpdate(chatId, {
+    lastMessage: newMessage.messageText,
   });
   //+ treba da dodam update lastMessage, kad je povezem sa modelom message
   newMessage
