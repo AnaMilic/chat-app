@@ -6,6 +6,7 @@ import ChatField from "./ChatField";
 import ChatColumn from "./ChatColumn";
 
 import io from "socket.io-client";
+import SearchModal from "./SearchModal";
 const ENDPOINT = "http://localhost:5050";
 var socket, selectedChatCompare;
 
@@ -23,6 +24,13 @@ function ChatPage() {
   const [typingState, setTypingState] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [notification, setNotification] = useState([]);
+
+  const [searchValue, setSearchValue] = useState("");
+  const [users, setUsers] = useState([]);
+  const [searchedUsers, setSearchedUsers] = useState([]);
+
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const searchModalRef = useRef(null);
 
   const fetchChats = () => {
     return axios
@@ -59,7 +67,6 @@ function ChatPage() {
           alert("There are no messages");
         } else {
           setMessages(response.data);
-          console.log(messages);
           socket.emit("join chat", selectedChat._id);
         }
       })
@@ -80,9 +87,8 @@ function ChatPage() {
     socket.on("typing", () => setIsTyping(true));
     socket.on("end typing", () => setIsTyping(false));
   }, []);
-  //console.log(selectedChat);
+
   const sendMessage = async (e) => {
-    //console.log("mess sendingggg");
     socket.emit("end typing", selectedChat._id);
     try {
       const reqBody = JSON.stringify({
@@ -101,7 +107,6 @@ function ChatPage() {
         body: reqBody,
       });
       const formattedResponse = await res.json();
-      console.log({ formattedResponse });
 
       if (res.status === 200) {
         setNewMessage("");
@@ -143,6 +148,18 @@ function ChatPage() {
     });
   });
 
+  useEffect(() => {
+    function outsideModalClick(ev) {
+      if (ev.target === searchModalRef.current) {
+        setSearchModalVisible(true);
+      }
+    }
+    window.addEventListener("click", outsideModalClick);
+    return () => {
+      window.removeEventListener("click", outsideModalClick);
+    };
+  }, []);
+
   if (chats.length === 0) {
     return null;
   }
@@ -171,7 +188,18 @@ function ChatPage() {
     localStorage.removeItem("user-info");
   };
 
-  console.log({ messages });
+  const fetchUsers = () => {
+    console.log("searching");
+    axios.get("http://localhost:5050/api/users").then((res) => {
+      setUsers(res.data);
+      console.log(users);
+    });
+    let searchedUsr = users.filter((u) => u.username.includes(searchValue));
+    console.log(searchedUsr);
+    setSearchedUsers(searchedUsr);
+    console.log(searchedUsers);
+    return searchedUsr;
+  };
 
   return (
     <div className="chatPage">
@@ -186,9 +214,26 @@ function ChatPage() {
         >
           My chats
         </div>
-        search
-        <br />
-        <input type="text" name="search" id="search" placeholder="search" />
+        <button
+          className="searchUsersBtn"
+          onClick={() => {
+            setSearchModalVisible(true);
+          }}
+        >
+          search users
+        </button>
+        {searchModalVisible && (
+          <SearchModal
+            setSearchModalVisible={setSearchModalVisible}
+            value={searchValue}
+            search={() => {
+              fetchUsers();
+            }}
+            onChange={(e) => setSearchValue(e.target.value)}
+            users={searchedUsers}
+            ref={searchModalRef}
+          />
+        )}
         {chats.map((c) => {
           return (
             <ChatField

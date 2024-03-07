@@ -112,12 +112,30 @@ button:enabled:hover {
   padding: 0px 5px;
   
 }
+.searchContacts{
+  margin:5%;
+  display: flex;
+  
+}
 #search{
-  width: 90%;
-  margin: 5% ;
+  width: 75%;
   border: 1px solid #ff6b35;
   border-radius: 20px;
   height: 10px;
+  margin:0px
+}
+.searchBtn{
+  width: 20%;
+  padding:10px;
+  border: 1px solid #ff6b35;
+  border-radius: 20px;
+  height: 10px;
+  margin:0px;
+  transition: none;
+  margin-left: 5%;
+  align-items: center;
+  display: flex;
+  justify-content: center;
 }
 .typing{
   background-color: beige;
@@ -127,5 +145,49 @@ button:enabled:hover {
   color: grey;
   margin: 10px;
   font-size: 80%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.searchUsersBtn{
+  width:90%;
+  height:5%;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 5%;
+}
+
+.searchModal{
+  position:fixed;
+  z-index:1;
+  width:50%;
+  height:50%;
+  overflow: auto;
+  background-color: #f8f8f8;
+  top: 25%;
+  left: 25%;
+  border-radius: 10px;
+  border: 1px solid #ff6b35;
+  
+}
+.closeSearchModal{
+  float: right;
+  color: #ff5659;
+  font: 20px bold;
+  margin-right:5px;
+  font-family: "Segoe Script";
+}
+.closeSearchModal:hover, .closeSearchModal:focus{
+  color: red;
+}
+.searchedUserField{
+  border: 1px solid #ffcb69;
+  margin: 2% 5% ;
+  border-radius: 5px;
+  padding: 5px;
+  background-color: #efe9ae;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
