@@ -191,3 +191,28 @@ button:enabled:hover {
   background-color: #efe9ae;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+.notifBtn{
+  background: border-box;
+  max-height: 5px;
+  max-width: 5px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin: inherit;
+  color: #000;
+}
+.notifList{
+  text-transform: none;
+  margin: 0px 5%;
+  padding: 0px 2px;
+  background-color: beige;
+  border: 1px solid #ff6b35;
+  border-radius: 5px;
+  min-height: 50px;
+  width: 90%;
+  text-align: start;
+  position: absolute;
+}
+.notifItem:hover{
+  background-color: #efe9ae;
+}

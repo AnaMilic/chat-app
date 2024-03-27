@@ -1,12 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ChatField from "./ChatField";
 import ChatColumn from "./ChatColumn";
-
 import io from "socket.io-client";
 import SearchModal from "./SearchModal";
+import NotificationBadge from "react-notification-badge/lib/components/NotificationBadge";
+import Effect from "react-notification-badge/lib/components/Effect";
+
 const ENDPOINT = "http://localhost:5050";
 var socket, selectedChatCompare;
 
@@ -16,7 +18,9 @@ function ChatPage() {
   let userId = JSON.parse(localStorage.getItem("user-info"))._id;
   let [selectedChat, setSelectedChat] = useState(null);
   let [messages, setMessages] = useState([]);
-  let [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const [isNewMessagesDropdownVisible, setIsNewMessagesDropdownVisible] =
+    useState(false);
 
   const chatColumnRef = useRef(null);
 
@@ -112,6 +116,10 @@ function ChatPage() {
         setNewMessage("");
         socket.emit("new message", formattedResponse);
         setMessages([...messages, formattedResponse]);
+        /*chatColumnRef.current.lastElementChild.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });*/
       } else {
         alert("Sending of message failed " + formattedResponse);
       }
@@ -127,7 +135,7 @@ function ChatPage() {
 
   useEffect(() => {
     socket.on("message received", (newMessageReceived) => {
-      console.log(newMessageReceived);
+      // console.log(newMessageReceived);
       if (
         !selectedChatCompare ||
         selectedChatCompare._id !== newMessageReceived.chat._id
@@ -140,6 +148,7 @@ function ChatPage() {
         flushSync(() => {
           setMessages([...messages, newMessageReceived]);
         });
+        console.log({ chatColumnRef });
         chatColumnRef.current.lastElementChild.scrollIntoView({
           behavior: "smooth",
           block: "end",
@@ -150,8 +159,8 @@ function ChatPage() {
 
   useEffect(() => {
     function outsideModalClick(ev) {
-      if (ev.target === searchModalRef.current) {
-        setSearchModalVisible(true);
+      if (!searchModalRef.current?.contains(ev.target) && searchModalVisible) {
+        setSearchModalVisible(false);
       }
     }
     window.addEventListener("click", outsideModalClick);
@@ -201,19 +210,57 @@ function ChatPage() {
     return searchedUsr;
   };
 
+  const renderNewMessages = () => (
+    <Fragment>
+      <div
+        style={{
+          textAlign: "center",
+          paddingTop: "5px",
+          textTransform: "uppercase",
+          fontStyle: "italic",
+          position: "relative",
+        }}
+      >
+        My chats{" "}
+        <button
+          className="notifBtn"
+          onClick={() => setIsNewMessagesDropdownVisible((p) => !p)}
+        >
+          <i className="fa-solid fa-comment" />
+          <NotificationBadge
+            count={notification.length}
+            effect={Effect.SCALE}
+            style={{
+              padding: "2px 4px",
+              top: "-15px",
+              left: "-5px",
+              right: "none",
+            }}
+          />
+        </button>
+        {isNewMessagesDropdownVisible && (
+          <div className="notifList">
+            {!notification.length && <p>You don't have new messages.</p>}
+            {notification.map((notif) => (
+              <p
+                className="notifItem"
+                key={notif._id}
+                onClick={() => {
+                  setSelectedChat(notif.chat);
+                  setNotification(notification.filter((not) => not !== notif));
+                }}
+              >{`New message from user ${notif.sender.username}.`}</p>
+            ))}
+          </div>
+        )}
+      </div>
+    </Fragment>
+  );
+
   return (
     <div className="chatPage">
       <div className="contactsColumn" style={{ alignSelf: "center" }}>
-        <div
-          style={{
-            textAlign: "center",
-            paddingTop: "5px",
-            textTransform: "uppercase",
-            fontStyle: "italic",
-          }}
-        >
-          My chats
-        </div>
+        {renderNewMessages()}
         <button
           className="searchUsersBtn"
           onClick={() => {
